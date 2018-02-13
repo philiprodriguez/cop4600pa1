@@ -47,9 +47,123 @@ void fcfs(Process * processes, int processCount, int runFor)
   printf("fcfs() not yet implemented!\n");
 }
 
+/*
+  Input:
+    [processes] is a list of processes
+    [processCount] is the size of the array [processes]
+    [runFor] is the running time
+  Output:
+    Returns nothing. Creates an output file with the output. TODO: make is actually print to a file
+  Description:
+    Runs the shortest job first algorithm on the input. Authored by Philip.
+*/
 void sjf(Process * processes, int processCount, int runFor)
 {
-  printf("sjf() not yet implemented!\n");
+  //Parallel arrays to processes
+  int * remainingBurstTimes = (int*)malloc(sizeof(int)*processCount);
+  int * waitTimes = (int*)malloc(sizeof(int)*processCount);
+  int * turnaroundTimes = (int*)malloc(sizeof(int)*processCount);
+  int * justFinished = (int*)malloc(sizeof(int)*processCount);
+
+  //Initialize our parallel arrays!
+  for(int p = 0; p < processCount; p++)
+  {
+    remainingBurstTimes[p] = processes[p].burst;
+    waitTimes[p] = 0;
+    turnaroundTimes[p] = -1;
+    justFinished[p] = 0;
+  }
+
+  //Go through every tick...
+  for (int t = 0; t < runFor; t++)
+  {
+    //Print finished messages
+    for(int p = 0; p < processCount; p++)
+    {
+      if (justFinished[p])
+      {
+        printf("Time %d: %s finished\n", t, processes[p].name);
+        justFinished[p] = 0;
+      }
+    }
+
+    //Arrive everybody that should get arrived!
+    for(int p = 0; p < processCount; p++)
+    {
+      if (processes[p].arrival == t)
+      {
+        printf("Time %d: %s arrived\n", t, processes[p].name);
+      }
+    }
+
+    //Find minimum remaining burst time for processes that have arrived...
+    int minBurstIndex = -1;
+    for(int p = 0; p < processCount; p++)
+    {
+      if (t < processes[p].arrival)
+      {
+        // This process has not arrived and should not be considered...
+        continue;
+      }
+      if (remainingBurstTimes[p] <= 0)
+      {
+        // This process already finished! Skip!
+        continue;
+      }
+      if (minBurstIndex == -1 || remainingBurstTimes[p] < remainingBurstTimes[minBurstIndex])
+      {
+        // I am the min burst index processes so far!
+        minBurstIndex = p;
+      }
+    }
+
+    //Update waiting times
+    for(int p = 0; p < processCount; p++)
+    {
+      // If we already arrived and we're not going to be run and we have not finished... we're waiting.
+      if (processes[p].arrival <= t && minBurstIndex != p && remainingBurstTimes[p] > 0)
+      {
+        waitTimes[p]++;
+      }
+    }
+
+
+    if (minBurstIndex == -1)
+    {
+      //Nobody to run... idle
+      printf("Time %d: Idle\n", t);
+    }
+    else
+    {
+      //Run the dude!
+      printf("Time %d: %s selected (burst %d)\n", t, processes[minBurstIndex].name, remainingBurstTimes[minBurstIndex]);
+      //Update burst time
+      remainingBurstTimes[minBurstIndex]--;
+      if (remainingBurstTimes[minBurstIndex] == 0)
+      {
+        // We just finished!
+        justFinished[minBurstIndex] = 1;
+        turnaroundTimes[minBurstIndex] = t+1-processes[minBurstIndex].arrival;
+      }
+    }
+  }
+
+  //Print finished messages
+  for(int p = 0; p < processCount; p++)
+  {
+    if (justFinished[p])
+    {
+      printf("Time %d: %s finished\n", runFor, processes[p].name);
+      justFinished[p] = 0;
+    }
+  }
+
+  printf("Finished at time %d\n", runFor);
+
+  free(remainingBurstTimes);
+  free(waitTimes);
+  free(turnaroundTimes);
+  free(justFinished);
 }
 
 void rr(Process * processes, int processCount, int runFor, int quantum)
@@ -198,6 +312,13 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
         return;
       }
 
+      //Make sure we have space!
+      if (curProcess >= processCount)
+      {
+        printf("Invalid input. More processes listed than process count indicates. Exiting...\n");
+        return;
+      }
+
       //Scan in the silly name word, and ignore it.
       fscanf(inputFile, "%s", tokenBuffer);
 
@@ -278,7 +399,32 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
     }
   }
 
-  //TODO: sanitize input for processcount, runfor, algorithm
+  //Sanitize input for processcount, runfor, algorithm, quantum
+  if (processCount == -1)
+  {
+    printf("Invalid input. Process count never set! Exiting...\n");
+    return;
+  }
+  if (processCount != curProcess)
+  {
+    printf("Invalid input. Process count not equal to the number of processes supplied. Exiting...\n");
+    return;
+  }
+  if (runFor == -1)
+  {
+    printf("Invalid input. Running time (runfor) never set! Exiting...\n");
+    return;
+  }
+  if (algorithm == -1)
+  {
+    printf("Invalid input. Algorithm to use never set! Exiting...\n");
+    return;
+  }
+  if (algorithm == 2 && quantum == -1)
+  {
+    printf("Invalid input. Round Robin algorithm selected, but quantum never set! Exiting...");
+    return;
+  }
 
   //Now, call the appropriate next step...
   if (algorithm == 0)
@@ -300,7 +446,12 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
     return;
   }
 
-  //TODO: FREE EVERYTHING (processes list)
+  //Free any dynamically allocated resources!
+  for (int p = 0; p < processCount; p++)
+  {
+    free(processes[p].name);
+  }
+  free(processes);
 
   //We're done with the file, so close it.
   fclose(inputFile);
