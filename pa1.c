@@ -59,6 +59,9 @@ void fcfs(Process * processes, int processCount, int runFor)
 */
 void sjf(Process * processes, int processCount, int runFor)
 {
+  //Get output file handle
+  FILE * outputFile = fopen("processes.out", "w+");
+
   //Parallel arrays to processes
   int * remainingBurstTimes = (int*)malloc(sizeof(int)*processCount);
   int * waitTimes = (int*)malloc(sizeof(int)*processCount);
@@ -82,7 +85,7 @@ void sjf(Process * processes, int processCount, int runFor)
     {
       if (justFinished[p])
       {
-        printf("Time %d: %s finished\n", t, processes[p].name);
+        fprintf(outputFile, "Time %d: %s finished\n", t, processes[p].name);
         justFinished[p] = 0;
       }
     }
@@ -92,7 +95,7 @@ void sjf(Process * processes, int processCount, int runFor)
     {
       if (processes[p].arrival == t)
       {
-        printf("Time %d: %s arrived\n", t, processes[p].name);
+        fprintf(outputFile, "Time %d: %s arrived\n", t, processes[p].name);
       }
     }
 
@@ -131,12 +134,12 @@ void sjf(Process * processes, int processCount, int runFor)
     if (minBurstIndex == -1)
     {
       //Nobody to run... idle
-      printf("Time %d: Idle\n", t);
+      fprintf(outputFile, "Time %d: Idle\n", t);
     }
     else
     {
       //Run the dude!
-      printf("Time %d: %s selected (burst %d)\n", t, processes[minBurstIndex].name, remainingBurstTimes[minBurstIndex]);
+      fprintf(outputFile, "Time %d: %s selected (burst %d)\n", t, processes[minBurstIndex].name, remainingBurstTimes[minBurstIndex]);
       //Update burst time
       remainingBurstTimes[minBurstIndex]--;
       if (remainingBurstTimes[minBurstIndex] == 0)
@@ -153,17 +156,20 @@ void sjf(Process * processes, int processCount, int runFor)
   {
     if (justFinished[p])
     {
-      printf("Time %d: %s finished\n", runFor, processes[p].name);
+      fprintf(outputFile, "Time %d: %s finished\n", runFor, processes[p].name);
       justFinished[p] = 0;
     }
   }
 
-  printf("Finished at time %d\n", runFor);
+  fprintf(outputFile, "Finished at time %d\n", runFor);
 
   free(remainingBurstTimes);
   free(waitTimes);
   free(turnaroundTimes);
   free(justFinished);
+  fclose(outputFile);
+
+  printf("sjf ran successfully. See processes.out file for output!\n");
 }
 
 void rr(Process * processes, int processCount, int runFor, int quantum)
