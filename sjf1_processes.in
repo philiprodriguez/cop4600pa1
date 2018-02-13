@@ -1,0 +1,8 @@
+processcount 4
+runfor 30
+use sjf
+process name P3 arrival 2 burst 9
+process name P1 arrival 0 burst 6
+process name P2 arrival 1 burst 12
+process name P4 arrival 3 burst 3
+end

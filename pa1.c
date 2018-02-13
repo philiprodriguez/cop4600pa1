@@ -161,7 +161,13 @@ void sjf(Process * processes, int processCount, int runFor)
     }
   }
 
-  fprintf(outputFile, "Finished at time %d\n", runFor);
+  fprintf(outputFile, "Finished at time %d\n\n", runFor);
+
+  //Print wait and turnaround times
+  for(int p = 0; p < processCount; p++)
+  {
+    fprintf(outputFile, "%s wait %d turnaround %d\n", processes[p].name, waitTimes[p], turnaroundTimes[p]);
+  }
 
   free(remainingBurstTimes);
   free(waitTimes);
