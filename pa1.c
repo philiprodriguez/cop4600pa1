@@ -42,10 +42,132 @@ int main()
   return 0;
 }
 
+/*
+  Input:
+    [processes] is a list of processes
+    [processCount] is the size of the array [processes]
+    [runFor] is the running time
+  Output:
+    Returns nothing. Creates an output file with the output.
+  Description:
+    Runs the first come first serve algorithm on the input. Authored by Steven.
+*/
 void fcfs(Process * processes, int processCount, int runFor)
 {
-  printf("fcfs() not yet implemented!\n");
+  // get output file handle
+  //FILE * outputFile = fopen("processes.out", "w+");
+  printf("%d\n", runFor);
+  int i, order, left = 0;
+  int *arrived = malloc(sizeof(int) * processCount);
+  int *selected = malloc(sizeof(int) * processCount);
+  int *wait = malloc(sizeof(int) * processCount);
+  int *turnaround = malloc(sizeof(int) * processCount);
+  int *finished = malloc(sizeof(int) * processCount);
+  int *remaining = malloc(sizeof(int) * processCount);
+  int *justFinished = malloc(sizeof(int) * processCount);
+  int *processOrder = malloc(sizeof(int) * processCount);
+  for (i = 0; i < processCount; i++) {
+    arrived[i] = 0;
+    wait[i] = 0;
+    turnaround[i] = 0;
+    finished[i] = 0;
+    justFinished[i] = 0;
+    processOrder[i] = 0;
+    selected[i] = 0;
+    remaining[i] = processes[i].burst;
+  }
+  printf("%d processes\n", processCount);
+  printf("Using First Come First Served\n\n");
+
+  // get order
+  for (int t = 0; t < runFor; t++) {
+    for (int a = 0; a < processCount; a++) {
+      if (processes[a].arrival == t) {
+        processOrder[order] = a;
+        order++;
+      }
+    }
+  }
+
+  order = 0;
+
+  for (int t = 0; t <= runFor; t++) {
+    int idle = 0;
+
+    // if it is done
+    for (int i = 0; i < processCount; i++) {
+      if (justFinished[i] == 1) {
+        printf("Time %d: %s finished\n", t, processes[i].name);
+        justFinished[i] = 0;
+        left--;
+        idle = 1;
+      }
+    }
+
+    // if arrived
+    for (int p = 0; p < processCount; p++) {
+      if (processes[p].arrival == t) {
+        printf("Time %d: %s arrived\n", t, processes[p].name);
+        arrived[processOrder[order]] = 1;
+        left++;
+      }
+    }
+
+    if (order < processCount) {
+      if (selected[processOrder[order]] != 1) {
+        if ((processes[processOrder[order]].arrival == t && left > 0) || (left > 0 && finished[processOrder[order]] == 0)) {
+          printf("Time %d: %s selected (burst %d)\n", t, processes[processOrder[order]].name, processes[processOrder[order]].burst);
+          selected[processOrder[order]] = 1;
+          wait[processOrder[order]] = t - processes[processOrder[order]].arrival;
+        }
+      }
+
+      // if selected, run it
+      if (selected[processOrder[order]] == 1 && remaining[processOrder[order]] != 0) {
+        remaining[processOrder[order]]--;
+      }
+
+      // if the selected is finished, do stuff
+      if (finished[processOrder[order]] == 0 && selected[processOrder[order]] == 1 && remaining[processOrder[order]] == 0) {
+        justFinished[processOrder[order]] = 1;
+        selected[processOrder[order]] = 0;
+        finished[processOrder[order]] = 1;
+
+        turnaround[processOrder[order]] = t - processes[processOrder[order]].arrival + 1;
+        order++;
+      }
+    }
+
+    // check for idle
+    int k = 0;
+    for (int j = 0; j < processCount; j++) {
+      if (selected[j] != 0 || justFinished[j] != 0) {
+        k = 1;
+      }
+    }
+    if (idle == 0 && k == 0) {
+      printf("Time %d: Idle\n", t);
+    }
+  }
+
+  printf("Finished at time %d\n\n", runFor);
+
+  // print wait and turnaround times
+  for (i = 0; i < processCount; i++) {
+    printf("%s wait %d turnaround %d\n", processes[i].name, wait[i], turnaround[i]);
+  }
+
+  //fclose(outputFile);
+  free(arrived);
+  free(selected);
+  free(wait);
+  free(turnaround);
+  free(finished);
+  free(justFinished);
+  free(processOrder);
+
 }
+
 
 /*
   Input:
