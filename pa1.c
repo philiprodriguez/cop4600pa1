@@ -60,7 +60,7 @@ void fcfs(Process * processes, int processCount, int runFor)
   int i, order, left = 0;
   int *arrived = malloc(sizeof(int) * processCount);
   int *selected = malloc(sizeof(int) * processCount);
-  int *wait = malloc(sizeof(int) * processCount);
+  int *waitTimes = malloc(sizeof(int) * processCount);
   int *turnaround = malloc(sizeof(int) * processCount);
   int *finished = malloc(sizeof(int) * processCount);
   int *remaining = malloc(sizeof(int) * processCount);
@@ -68,7 +68,7 @@ void fcfs(Process * processes, int processCount, int runFor)
   int *processOrder = malloc(sizeof(int) * processCount);
   for (i = 0; i < processCount; i++) {
     arrived[i] = 0;
-    wait[i] = 0;
+    waitTimes[i] = 0;
     turnaround[i] = 0;
     finished[i] = 0;
     justFinished[i] = 0;
@@ -118,7 +118,7 @@ void fcfs(Process * processes, int processCount, int runFor)
         if ((processes[processOrder[order]].arrival == t && left > 0) || (left > 0 && finished[processOrder[order]] == 0)) {
           printf("Time %d: %s selected (burst %d)\n", t, processes[processOrder[order]].name, processes[processOrder[order]].burst);
           selected[processOrder[order]] = 1;
-          wait[processOrder[order]] = t - processes[processOrder[order]].arrival;
+          waitTimes[processOrder[order]] = t - processes[processOrder[order]].arrival;
         }
       }
 
@@ -154,13 +154,13 @@ void fcfs(Process * processes, int processCount, int runFor)
 
   // print wait and turnaround times
   for (i = 0; i < processCount; i++) {
-    printf("%s wait %d turnaround %d\n", processes[i].name, wait[i], turnaround[i]);
+    printf("%s wait %d turnaround %d\n", processes[i].name, waitTimes[i], turnaround[i]);
   }
 
   //fclose(outputFile);
   free(arrived);
   free(selected);
-  free(wait);
+  free(waitTimes);
   free(turnaround);
   free(finished);
   free(justFinished);
