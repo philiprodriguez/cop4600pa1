@@ -416,6 +416,8 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 	printf("Finished at time %d\n\n",runFor);
 	printf("Wait and turnaround time REEEEEEEEEEEEEEEEEEE\n");
 	
+	free(q);
+	
 }
 
 /*
