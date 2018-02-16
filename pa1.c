@@ -55,9 +55,8 @@ int main()
 void fcfs(Process * processes, int processCount, int runFor)
 {
   // get output file handle
-  //FILE * outputFile = fopen("processes.out", "w+");
-  printf("%d\n", runFor);
-  int i, order, left = 0;
+  FILE * outputFile = fopen("processes.out", "w+");
+  int i = 0, order = 0, left = 0;
   int *arrived = malloc(sizeof(int) * processCount);
   int *selected = malloc(sizeof(int) * processCount);
   int *waitTimes = malloc(sizeof(int) * processCount);
@@ -76,8 +75,8 @@ void fcfs(Process * processes, int processCount, int runFor)
     selected[i] = 0;
     remaining[i] = processes[i].burst;
   }
-  printf("%d processes\n", processCount);
-  printf("Using First Come First Served\n\n");
+  fprintf(outputFile, "%d processes\n", processCount);
+  fprintf(outputFile, "Using First Come First Served\n\n");
 
   // get order
   for (int t = 0; t < runFor; t++) {
@@ -97,7 +96,7 @@ void fcfs(Process * processes, int processCount, int runFor)
     // if it is done
     for (int i = 0; i < processCount; i++) {
       if (justFinished[i] == 1) {
-        printf("Time %d: %s finished\n", t, processes[i].name);
+        fprintf(outputFile, "Time %d: %s finished\n", t, processes[i].name);
         justFinished[i] = 0;
         left--;
         idle = 1;
@@ -107,7 +106,7 @@ void fcfs(Process * processes, int processCount, int runFor)
     // if arrived
     for (int p = 0; p < processCount; p++) {
       if (processes[p].arrival == t) {
-        printf("Time %d: %s arrived\n", t, processes[p].name);
+        fprintf(outputFile, "Time %d: %s arrived\n", t, processes[p].name);
         arrived[processOrder[order]] = 1;
         left++;
       }
@@ -116,7 +115,7 @@ void fcfs(Process * processes, int processCount, int runFor)
     if (order < processCount) {
       if (selected[processOrder[order]] != 1) {
         if ((processes[processOrder[order]].arrival == t && left > 0) || (left > 0 && finished[processOrder[order]] == 0)) {
-          printf("Time %d: %s selected (burst %d)\n", t, processes[processOrder[order]].name, processes[processOrder[order]].burst);
+          fprintf(outputFile, "Time %d: %s selected (burst %d)\n", t, processes[processOrder[order]].name, processes[processOrder[order]].burst);
           selected[processOrder[order]] = 1;
           waitTimes[processOrder[order]] = t - processes[processOrder[order]].arrival;
         }
@@ -146,18 +145,18 @@ void fcfs(Process * processes, int processCount, int runFor)
       }
     }
     if (idle == 0 && k == 0) {
-      printf("Time %d: Idle\n", t);
+      fprintf(outputFile, "Time %d: Idle\n", t);
     }
   }
 
-  printf("Finished at time %d\n\n", runFor);
+  fprintf(outputFile, "Finished at time %d\n\n", runFor);
 
   // print wait and turnaround times
   for (i = 0; i < processCount; i++) {
-    printf("%s wait %d turnaround %d\n", processes[i].name, waitTimes[i], turnaround[i]);
+    fprintf(outputFile, "%s wait %d turnaround %d\n", processes[i].name, waitTimes[i], turnaround[i]);
   }
 
-  //fclose(outputFile);
+  fclose(outputFile);
   free(arrived);
   free(selected);
   free(waitTimes);
