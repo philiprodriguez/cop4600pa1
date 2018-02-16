@@ -17,6 +17,7 @@ typedef struct Process {
   int arrival;
   int burst;
   int remainder;
+  int finishTime;
 } Process;
 
 /*
@@ -39,7 +40,7 @@ void rr(Process * processes, int processCount, int runFor, int quantum);
 // Program Entry Point
 int main()
 {
-  parseInputAndDelegateWork("rr.in", 0); //TODO: Change back to processes.in before submitting.
+  parseInputAndDelegateWork("unfinished.in", 0); //TODO: Change back to processes.in before submitting.
   return 0;
 }
 
@@ -392,7 +393,7 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 			if(cur->remainder == 1){
 				printf("Time %d: %s finished\n", t, cur->name);
 				timeLeft = 0;
-				cur->remainder = t; //remainder now represents the time of completion. NICE!!
+				cur->finishTime = t;
 				cur = NULL; //Goodbye, cur. (This reference is contained in processes, so it's OK)
 			}else{				
 				cur->remainder--;
@@ -416,9 +417,11 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 	}
 	
 	printf("Finished at time %d\n\n",runFor);
-	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess this prints in arrival order now.
-		//FIXME: account for processes that don't finish before the simulation is over.
-		printf("%s wait %d turnaround %d\n",processes[i].name, processes[i].remainder-processes[i].arrival-processes[i].burst, processes[i].remainder-processes[i].arrival);
+	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess this prints in order of arrival.
+		if(processes[i].finishTime>=0)
+			printf("%s wait %d turnaround %d\n", processes[i].name, processes[i].finishTime-processes[i].arrival-processes[i].burst, processes[i].finishTime-processes[i].arrival);
+		else
+			printf("%s wait %d turnaround N/A (unfinished)\n", processes[i].name, runFor-processes[i].arrival-(processes[i].burst-processes[i].remainder));
 	}
 	
 	free(q);
@@ -574,7 +577,7 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
       }
 
       //Scan in the silly name word, and ignore it.
-      fscanf(inputFile, "%s", tokenBuffer); //what if input is mal-formed and they forgot to put the word "name"???????????????
+      fscanf(inputFile, "%s", tokenBuffer); //FIXME: what if input is mal-formed and they forgot to put the word "name"???????????????
 
       //Scan in the ACTUAL name.
       int result = fscanf(inputFile, "%s", tokenBuffer);
@@ -606,6 +609,7 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
             processes[curProcess].name = pname;
             processes[curProcess].arrival = parrival;
             processes[curProcess].burst = processes[curProcess].remainder = pburst;
+			processes[curProcess].finishTime = -1;
             curProcess++;
           }
           else
