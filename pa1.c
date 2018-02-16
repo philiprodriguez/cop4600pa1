@@ -38,7 +38,7 @@ void rr(Process * processes, int processCount, int runFor, int quantum);
 // Program Entry Point
 int main()
 {
-  parseInputAndDelegateWork("processes.in", 0);
+  parseInputAndDelegateWork("rr.in", 0); //TODO: Change back to processes.in before submitting.
   return 0;
 }
 
@@ -299,9 +299,123 @@ void sjf(Process * processes, int processCount, int runFor)
   printf("sjf ran successfully. See processes.out file for output!\n");
 }
 
-void rr(Process * processes, int processCount, int runFor, int quantum)
-{
-  printf("rr() not yet implemented!\n");
+// A utility function to swap two elements
+void swap(Process* a, Process* b){
+    Process t = *a;
+    *a = *b;
+    *b = t;
+}
+ 
+/* This function takes last element as pivot, places
+   the pivot element at its correct position in sorted
+    array, and places all smaller (smaller than pivot)
+   to left of pivot and all greater elements to right
+   of pivot
+   
+   Modified from GeekforGeeks
+   */
+int partition (Process *arr, int low, int high){
+    Process pivot = arr[high];    // pivot
+    int i = (low - 1);  // Index of smaller element
+ 
+    for (int j = low; j <= high- 1; j++){
+        // If current element is smaller than or
+        // equal to pivot
+        if (arr[j].arrival <= pivot.arrival){
+            i++;    // increment index of smaller element
+            swap(&arr[i], &arr[j]); //arr + i?
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+ 
+/* The main function that implements QuickSort
+  arr --> Array to be sorted,
+  low  --> Starting index,
+  high  --> Ending index */
+void quickSort(Process *arr, int low, int high){
+    if (low < high){
+        /* pi is partitioning index, arr[p] is now
+           at right place */
+        int pi = partition(arr, low, high);
+ 
+        // Separately sort elements before
+        // partition and after partition
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+//=========================================AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH======================================
+
+Process **q;
+int ql,qr,qSize,qMax; //ql is head of q, qr is index where next item is allowed to go
+
+void insert(Process *proc){
+	q[qr] = proc;
+	qr = (qr+1) % qMax;
+	qSize++;
+}
+
+Process *poll(){
+	Process *ans = q[ql];
+	ql = (ql+1) % qMax;
+	qSize--;
+	return ans;
+}
+
+Process *peek(){
+	return q[ql];
+}
+
+void rr(Process *processes, int processCount, int runFor, int quantum){
+	
+	int pi = 0, timeLeft = 0;
+	Process *cur = NULL;
+	q = malloc(sizeof(Process*) * processCount);
+	ql = qr = 0;
+	qSize = 0;
+	qMax = processCount;
+	quickSort(processes,0,processCount-1);
+	
+	printf("%d processes\nUsing Round-Robin\nQuantum %d\n\n",processCount,quantum);
+	
+	for(int t=0;t<runFor;t++){
+		if(processes[pi].arrival==t){ //something arrived
+			insert(processes+pi); //insert takes a pointer
+			printf("Time %d: %s arrived\n", t, processes[pi].name);
+			pi++;
+		}
+		if(cur){
+			if(cur->burst == 1){
+				printf("Time %d: %s finished\n", t, cur->name);
+				timeLeft = 0;
+				cur = NULL; //Goodbye, cur. (This reference is contained in processes, so it's OK)
+			}else{				
+				cur->burst--;
+				timeLeft--;
+			}
+		}
+		if(timeLeft==0){ //Time to grab a new process.
+			if(cur){
+				insert(cur);
+			}
+			if(qSize > 0){
+				cur = poll();
+				printf("Time %d: %s selected (burst %d)\n", t, cur->name, cur->burst);
+				timeLeft = quantum;
+			}else{
+				cur = NULL;
+			}
+		}
+		if(!cur)
+			printf("Time %d: Idle\n",t);
+	}
+	
+	printf("Finished at time %d\n\n",runFor);
+	printf("Wait and turnaround time REEEEEEEEEEEEEEEEEEE\n");
+	
 }
 
 /*
@@ -453,7 +567,7 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
       }
 
       //Scan in the silly name word, and ignore it.
-      fscanf(inputFile, "%s", tokenBuffer);
+      fscanf(inputFile, "%s", tokenBuffer); //what if input is mal-formed and they forgot to put the word "name"???????????????
 
       //Scan in the ACTUAL name.
       int result = fscanf(inputFile, "%s", tokenBuffer);
