@@ -1,6 +1,6 @@
 #A case with a process that can't finish before the simulation stops.
 #Does your code handle this?
-#P1 should have wait time of 0, turnaround N/A.
+#P1 should have wait time of 1, turnaround N/A.
 
 processcount 2
 runfor 10             
