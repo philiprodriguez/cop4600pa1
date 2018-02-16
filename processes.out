@@ -1,30 +1,21 @@
-35
-5 processes
-Using First Come First Served
+3 processes
+Using First-Come First-Served
 
 Time 0: Idle
-Time 1: P1 arrived
-Time 1: P1 selected (burst 6)
-Time 3: P2 arrived
-Time 5: P3 arrived
-Time 7: P1 finished
-Time 7: P4 arrived
-Time 7: P2 selected (burst 12)
-Time 9: P5 arrived
-Time 19: P2 finished
-Time 19: P3 selected (burst 2)
-Time 21: P3 finished
-Time 21: P4 selected (burst 8)
-Time 29: P4 finished
-Time 29: P5 selected (burst 3)
-Time 32: P5 finished
-Time 33: Idle
-Time 34: Idle
-Time 35: Idle
-Finished at time 35
+Time 1: Idle
+Time 2: Idle
+Time 3: P1 arrived
+Time 3: P1 selected (burst 7)
+Time 4: P3 arrived
+Time 8: P2 arrived
+Time 10: P1 finished
+Time 10: P3 selected (burst 2)
+Time 12: P3 finished
+Time 12: P2 selected (burst 9)
+Time 21: P2 finished
+Time 22: Idle
+Finished at time 22
 
-P1 wait 0 turnaround 6
-P2 wait 4 turnaround 16
-P3 wait 14 turnaround 16
-P4 wait 14 turnaround 22
-P5 wait 20 turnaround 23
+P1 wait 0 turnaround 7
+P2 wait 4 turnaround 13
+P3 wait 6 turnaround 8

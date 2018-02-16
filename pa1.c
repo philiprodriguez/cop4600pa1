@@ -40,7 +40,7 @@ void rr(Process * processes, int processCount, int runFor, int quantum);
 // Program Entry Point
 int main()
 {
-  parseInputAndDelegateWork("unfinished.in", 0); //TODO: Change back to processes.in before submitting.
+  parseInputAndDelegateWork("processes.in", 0);
   return 0;
 }
 
@@ -78,7 +78,7 @@ void fcfs(Process * processes, int processCount, int runFor)
     remaining[i] = processes[i].burst;
   }
   fprintf(outputFile, "%d processes\n", processCount);
-  fprintf(outputFile, "Using First Come First Served\n\n");
+  fprintf(outputFile, "Using First-Come First-Served\n\n");
 
   // get order
   for (int t = 0; t < runFor; t++) {
@@ -176,7 +176,7 @@ void fcfs(Process * processes, int processCount, int runFor)
     [processCount] is the size of the array [processes]
     [runFor] is the running time
   Output:
-    Returns nothing. Creates an output file with the output. TODO: make is actually print to a file
+    Returns nothing. Creates an output file with the output.
   Description:
     Runs the shortest job first algorithm on the input. Authored by Philip.
 */
@@ -185,11 +185,17 @@ void sjf(Process * processes, int processCount, int runFor)
   //Get output file handle
   FILE * outputFile = fopen("processes.out", "w+");
 
+  fprintf(outputFile, "%d processes\n", processCount);
+  fprintf(outputFile, "Using Shortest Job First\n\n");
+
   //Parallel arrays to processes
   int * remainingBurstTimes = (int*)malloc(sizeof(int)*processCount);
   int * waitTimes = (int*)malloc(sizeof(int)*processCount);
   int * turnaroundTimes = (int*)malloc(sizeof(int)*processCount);
   int * justFinished = (int*)malloc(sizeof(int)*processCount);
+
+  //Which process was last selected?
+  int lastSelected = -1;
 
   //Initialize our parallel arrays!
   for(int p = 0; p < processCount; p++)
@@ -262,7 +268,14 @@ void sjf(Process * processes, int processCount, int runFor)
     else
     {
       //Run the dude!
-      fprintf(outputFile, "Time %d: %s selected (burst %d)\n", t, processes[minBurstIndex].name, remainingBurstTimes[minBurstIndex]);
+
+      //So apparently we only want to print if this guy was not previously the selected guy...
+      if (lastSelected != minBurstIndex)
+      {
+        lastSelected = minBurstIndex;
+        fprintf(outputFile, "Time %d: %s selected (burst %d)\n", t, processes[minBurstIndex].name, remainingBurstTimes[minBurstIndex]);
+      }
+
       //Update burst time
       remainingBurstTimes[minBurstIndex]--;
       if (remainingBurstTimes[minBurstIndex] == 0)
@@ -307,19 +320,19 @@ void swap(Process* a, Process* b){
     *a = *b;
     *b = t;
 }
- 
+
 /* This function takes last element as pivot, places
    the pivot element at its correct position in sorted
     array, and places all smaller (smaller than pivot)
    to left of pivot and all greater elements to right
    of pivot
-   
+
    Modified from GeekforGeeks
    */
 int partition (Process *arr, int low, int high){
     Process pivot = arr[high];    // pivot
     int i = (low - 1);  // Index of smaller element
- 
+
     for (int j = low; j <= high- 1; j++){
         // If current element is smaller than or
         // equal to pivot
@@ -331,7 +344,7 @@ int partition (Process *arr, int low, int high){
     swap(&arr[i + 1], &arr[high]);
     return (i + 1);
 }
- 
+
 /* The main function that implements QuickSort
   arr --> Array to be sorted,
   low  --> Starting index,
@@ -341,15 +354,13 @@ void quickSort(Process *arr, int low, int high){
         /* pi is partitioning index, arr[p] is now
            at right place */
         int pi = partition(arr, low, high);
- 
+
         // Separately sort elements before
         // partition and after partition
         quickSort(arr, low, pi - 1);
         quickSort(arr, pi + 1, high);
     }
 }
-
-//=========================================AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH======================================
 
 Process **q;
 int ql,qr,qSize,qMax; //ql is head of q, qr is index where next item is allowed to go
@@ -372,7 +383,7 @@ Process *peek(){
 }
 
 void rr(Process *processes, int processCount, int runFor, int quantum){
-	
+
 	int pi = 0, timeLeft = 0;
 	Process *cur = NULL;
 	q = malloc(sizeof(Process*) * processCount);
@@ -380,9 +391,9 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 	qSize = 0;
 	qMax = processCount;
 	quickSort(processes,0,processCount-1);
-	
+
 	printf("%d processes\nUsing Round-Robin\nQuantum %d\n\n",processCount,quantum);
-	
+
 	for(int t=0;t<runFor;t++){
 		if(processes[pi].arrival==t){ //something arrived
 			insert(processes+pi); //insert takes a pointer
@@ -395,7 +406,7 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 				timeLeft = 0;
 				cur->finishTime = t;
 				cur = NULL; //Goodbye, cur. (This reference is contained in processes, so it's OK)
-			}else{				
+			}else{
 				cur->remainder--;
 				timeLeft--;
 			}
@@ -415,7 +426,7 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 		if(!cur)
 			printf("Time %d: Idle\n",t);
 	}
-	
+
 	printf("Finished at time %d\n\n",runFor);
 	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess this prints in order of arrival.
 		if(processes[i].finishTime>=0)
@@ -423,9 +434,9 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 		else
 			printf("%s wait %d turnaround N/A (unfinished)\n", processes[i].name, runFor-processes[i].arrival-(processes[i].burst-processes[i].remainder));
 	}
-	
+
 	free(q);
-	
+
 }
 
 /*
@@ -609,7 +620,7 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
             processes[curProcess].name = pname;
             processes[curProcess].arrival = parrival;
             processes[curProcess].burst = processes[curProcess].remainder = pburst;
-			processes[curProcess].finishTime = -1;
+			      processes[curProcess].finishTime = -1;
             curProcess++;
           }
           else
