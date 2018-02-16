@@ -16,6 +16,7 @@ typedef struct Process {
   char * name;
   int arrival;
   int burst;
+  int remainder;
 } Process;
 
 /*
@@ -388,12 +389,13 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 			pi++;
 		}
 		if(cur){
-			if(cur->burst == 1){
+			if(cur->remainder == 1){
 				printf("Time %d: %s finished\n", t, cur->name);
 				timeLeft = 0;
+				cur->remainder = t; //remainder now represents the time of completion. NICE!!
 				cur = NULL; //Goodbye, cur. (This reference is contained in processes, so it's OK)
 			}else{				
-				cur->burst--;
+				cur->remainder--;
 				timeLeft--;
 			}
 		}
@@ -403,7 +405,7 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 			}
 			if(qSize > 0){
 				cur = poll();
-				printf("Time %d: %s selected (burst %d)\n", t, cur->name, cur->burst);
+				printf("Time %d: %s selected (burst %d)\n", t, cur->name, cur->remainder);
 				timeLeft = quantum;
 			}else{
 				cur = NULL;
@@ -414,7 +416,10 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 	}
 	
 	printf("Finished at time %d\n\n",runFor);
-	printf("Wait and turnaround time REEEEEEEEEEEEEEEEEEE\n");
+	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess this prints in arrival order now.
+		//FIXME: account for processes that don't finish before the simulation is over.
+		printf("%s wait %d turnaround %d\n",processes[i].name, processes[i].remainder-processes[i].arrival-processes[i].burst, processes[i].remainder-processes[i].arrival);
+	}
 	
 	free(q);
 	
@@ -600,7 +605,7 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
             //process list!
             processes[curProcess].name = pname;
             processes[curProcess].arrival = parrival;
-            processes[curProcess].burst = pburst;
+            processes[curProcess].burst = processes[curProcess].remainder = pburst;
             curProcess++;
           }
           else
