@@ -378,31 +378,28 @@ Process *poll(){
 	return ans;
 }
 
-Process *peek(){
-	return q[ql];
-}
-
 void rr(Process *processes, int processCount, int runFor, int quantum){
 
 	int pi = 0, timeLeft = 0;
 	Process *cur = NULL;
+	FILE *out = fopen("processes.out","w+");
 	q = malloc(sizeof(Process*) * processCount);
 	ql = qr = 0;
 	qSize = 0;
 	qMax = processCount;
 	quickSort(processes,0,processCount-1);
-
-	printf("%d processes\nUsing Round-Robin\nQuantum %d\n\n",processCount,quantum);
-
+	
+	fprintf(out,"%d processes\nUsing Round-Robin\nQuantum %d\n\n",processCount,quantum);
+  
 	for(int t=0;t<runFor;t++){
 		if(processes[pi].arrival==t){ //something arrived
 			insert(processes+pi); //insert takes a pointer
-			printf("Time %d: %s arrived\n", t, processes[pi].name);
+			fprintf(out, "Time %d: %s arrived\n", t, processes[pi].name);
 			pi++;
 		}
 		if(cur){
 			if(cur->remainder == 1){
-				printf("Time %d: %s finished\n", t, cur->name);
+				fprintf(out, "Time %d: %s finished\n", t, cur->name);
 				timeLeft = 0;
 				cur->finishTime = t;
 				cur = NULL; //Goodbye, cur. (This reference is contained in processes, so it's OK)
@@ -417,26 +414,36 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 			}
 			if(qSize > 0){
 				cur = poll();
-				printf("Time %d: %s selected (burst %d)\n", t, cur->name, cur->remainder);
+				fprintf(out, "Time %d: %s selected (burst %d)\n", t, cur->name, cur->remainder);
 				timeLeft = quantum;
 			}else{
 				cur = NULL;
 			}
 		}
 		if(!cur)
-			printf("Time %d: Idle\n",t);
+			fprintf(out,"Time %d: Idle\n",t);
 	}
+	
+	//annoying edge case: A process may complete right as the simulation ends,
+	//even though we won't detect or announce it.
+	//This accounts for that.
+	if(cur && cur->remainder==1){
+		cur->finishTime = runFor;
+	}
+	
+	fprintf(out, "Finished at time %d\n\n",runFor);
+	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess round robin prints in order of arrival.
 
-	printf("Finished at time %d\n\n",runFor);
-	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess this prints in order of arrival.
 		if(processes[i].finishTime>=0)
-			printf("%s wait %d turnaround %d\n", processes[i].name, processes[i].finishTime-processes[i].arrival-processes[i].burst, processes[i].finishTime-processes[i].arrival);
+			fprintf(out, "%s wait %d turnaround %d\n", processes[i].name, processes[i].finishTime-processes[i].arrival-processes[i].burst, processes[i].finishTime-processes[i].arrival);
 		else
-			printf("%s wait %d turnaround N/A (unfinished)\n", processes[i].name, runFor-processes[i].arrival-(processes[i].burst-processes[i].remainder));
+			fprintf(out, "%s wait %d turnaround N/A (unfinished)\n", processes[i].name, runFor-processes[i].arrival-(processes[i].burst-processes[i].remainder));
 	}
 
 	free(q);
 
+	fclose(out);
+	
 }
 
 /*
