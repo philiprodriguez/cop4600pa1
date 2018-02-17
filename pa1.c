@@ -40,11 +40,7 @@ void rr(Process * processes, int processCount, int runFor, int quantum);
 // Program Entry Point
 int main()
 {
-<<<<<<< HEAD
-  parseInputAndDelegateWork("rr_null_pointer.in", 0); //TODO: Change back to processes.in before submitting.
-=======
   parseInputAndDelegateWork("processes.in", 0);
->>>>>>> 9265db69d7639a25fe38a5e3599aa90d5e84273d
   return 0;
 }
 
