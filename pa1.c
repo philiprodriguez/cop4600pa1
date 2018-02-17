@@ -40,7 +40,7 @@ void rr(Process * processes, int processCount, int runFor, int quantum);
 // Program Entry Point
 int main()
 {
-  parseInputAndDelegateWork("unfinished.in", 0); //TODO: Change back to processes.in before submitting.
+  parseInputAndDelegateWork("break_rr.in", 0); //TODO: Change back to processes.in before submitting.
   return 0;
 }
 
@@ -349,8 +349,6 @@ void quickSort(Process *arr, int low, int high){
     }
 }
 
-//=========================================AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH======================================
-
 Process **q;
 int ql,qr,qSize,qMax; //ql is head of q, qr is index where next item is allowed to go
 
@@ -365,10 +363,6 @@ Process *poll(){
 	ql = (ql+1) % qMax;
 	qSize--;
 	return ans;
-}
-
-Process *peek(){
-	return q[ql];
 }
 
 void rr(Process *processes, int processCount, int runFor, int quantum){
@@ -416,8 +410,15 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 			printf("Time %d: Idle\n",t);
 	}
 	
+	//annoying edge case: A process may complete right as the simulation ends,
+	//even though we won't detect or announce it.
+	//This accounts for that.
+	if(cur && cur->remainder==1){
+		cur->finishTime = runFor;
+	}
+	
 	printf("Finished at time %d\n\n",runFor);
-	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess this prints in order of arrival.
+	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess round robin prints in order of arrival.
 		if(processes[i].finishTime>=0)
 			printf("%s wait %d turnaround %d\n", processes[i].name, processes[i].finishTime-processes[i].arrival-processes[i].burst, processes[i].finishTime-processes[i].arrival);
 		else

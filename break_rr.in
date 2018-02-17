@@ -1,0 +1,10 @@
+processcount 3
+runfor 21
+use rr
+quantum 4
+process name P1 arrival 3 burst 7
+process name P2 arrival 8 burst 9
+process name P3 arrival 4 burst 2
+end
+
+#at the end, rr states that P2 is never finished, but in 21 time units all three should finish, with p2 finishing in the last possible tick (time 20 to time 21)
