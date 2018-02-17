@@ -392,7 +392,7 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 	fprintf(out,"%d processes\nUsing Round-Robin\nQuantum %d\n\n",processCount,quantum);
   
 	for(int t=0;t<runFor;t++){
-		if(processes[pi].arrival==t){ //something arrived
+		if(pi < processCount && processes[pi].arrival==t){ //something arrived
 			insert(processes+pi); //insert takes a pointer
 			fprintf(out, "Time %d: %s arrived\n", t, processes[pi].name);
 			pi++;
