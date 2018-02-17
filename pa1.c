@@ -58,7 +58,7 @@ void fcfs(Process * processes, int processCount, int runFor)
 {
   // get output file handle
   FILE * outputFile = fopen("processes.out", "w+");
-  int i = 0, order = 0, left = 0;
+  int i = 0, order = 0, left = 0, t, a, p, j, k;
   int *arrived = malloc(sizeof(int) * processCount);
   int *selected = malloc(sizeof(int) * processCount);
   int *waitTimes = malloc(sizeof(int) * processCount);
@@ -81,8 +81,8 @@ void fcfs(Process * processes, int processCount, int runFor)
   fprintf(outputFile, "Using First-Come First-Served\n\n");
 
   // get order
-  for (int t = 0; t < runFor; t++) {
-    for (int a = 0; a < processCount; a++) {
+  for (t = 0; t < runFor; t++) {
+    for (a = 0; a < processCount; a++) {
       if (processes[a].arrival == t) {
         processOrder[order] = a;
         order++;
@@ -92,11 +92,11 @@ void fcfs(Process * processes, int processCount, int runFor)
 
   order = 0;
 
-  for (int t = 0; t <= runFor; t++) {
+  for (t = 0; t <= runFor; t++) {
     int idle = 0;
 
     // if it is done
-    for (int i = 0; i < processCount; i++) {
+    for (i = 0; i < processCount; i++) {
       if (justFinished[i] == 1) {
         fprintf(outputFile, "Time %d: %s finished\n", t, processes[i].name);
         justFinished[i] = 0;
@@ -106,7 +106,7 @@ void fcfs(Process * processes, int processCount, int runFor)
     }
 
     // if arrived
-    for (int p = 0; p < processCount; p++) {
+    for (p = 0; p < processCount; p++) {
       if (processes[p].arrival == t) {
         fprintf(outputFile, "Time %d: %s arrived\n", t, processes[p].name);
         arrived[processOrder[order]] = 1;
@@ -140,8 +140,8 @@ void fcfs(Process * processes, int processCount, int runFor)
     }
 
     // check for idle
-    int k = 0;
-    for (int j = 0; j < processCount; j++) {
+    k = 0;
+    for (j = 0; j < processCount; j++) {
       if (selected[j] != 0 || justFinished[j] != 0) {
         k = 1;
       }
@@ -193,12 +193,13 @@ void sjf(Process * processes, int processCount, int runFor)
   int * waitTimes = (int*)malloc(sizeof(int)*processCount);
   int * turnaroundTimes = (int*)malloc(sizeof(int)*processCount);
   int * justFinished = (int*)malloc(sizeof(int)*processCount);
+  int t, p;
 
   //Which process was last selected?
   int lastSelected = -1;
 
   //Initialize our parallel arrays!
-  for(int p = 0; p < processCount; p++)
+  for(p = 0; p < processCount; p++)
   {
     remainingBurstTimes[p] = processes[p].burst;
     waitTimes[p] = 0;
@@ -207,10 +208,10 @@ void sjf(Process * processes, int processCount, int runFor)
   }
 
   //Go through every tick...
-  for (int t = 0; t < runFor; t++)
+  for (t = 0; t < runFor; t++)
   {
     //Print finished messages
-    for(int p = 0; p < processCount; p++)
+    for(p = 0; p < processCount; p++)
     {
       if (justFinished[p])
       {
@@ -220,7 +221,7 @@ void sjf(Process * processes, int processCount, int runFor)
     }
 
     //Arrive everybody that should get arrived!
-    for(int p = 0; p < processCount; p++)
+    for(p = 0; p < processCount; p++)
     {
       if (processes[p].arrival == t)
       {
@@ -230,7 +231,7 @@ void sjf(Process * processes, int processCount, int runFor)
 
     //Find minimum remaining burst time for processes that have arrived...
     int minBurstIndex = -1;
-    for(int p = 0; p < processCount; p++)
+    for(p = 0; p < processCount; p++)
     {
       if (t < processes[p].arrival)
       {
@@ -250,7 +251,7 @@ void sjf(Process * processes, int processCount, int runFor)
     }
 
     //Update waiting times
-    for(int p = 0; p < processCount; p++)
+    for(p = 0; p < processCount; p++)
     {
       // If we already arrived and we're not going to be run and we have not finished... we're waiting.
       if (processes[p].arrival <= t && minBurstIndex != p && remainingBurstTimes[p] > 0)
@@ -288,7 +289,7 @@ void sjf(Process * processes, int processCount, int runFor)
   }
 
   //Print finished messages
-  for(int p = 0; p < processCount; p++)
+  for(p = 0; p < processCount; p++)
   {
     if (justFinished[p])
     {
@@ -300,7 +301,7 @@ void sjf(Process * processes, int processCount, int runFor)
   fprintf(outputFile, "Finished at time %d\n\n", runFor);
 
   //Print wait and turnaround times
-  for(int p = 0; p < processCount; p++)
+  for(p = 0; p < processCount; p++)
   {
     fprintf(outputFile, "%s wait %d turnaround %d\n", processes[p].name, waitTimes[p], turnaroundTimes[p]);
   }
@@ -330,10 +331,11 @@ void swap(Process* a, Process* b){
    Modified from GeekforGeeks
    */
 int partition (Process *arr, int low, int high){
+  int i, j;
     Process pivot = arr[high];    // pivot
-    int i = (low - 1);  // Index of smaller element
+    i = (low - 1);  // Index of smaller element
 
-    for (int j = low; j <= high- 1; j++){
+    for (j = low; j <= high- 1; j++){
         // If current element is smaller than or
         // equal to pivot
         if (arr[j].arrival <= pivot.arrival){
@@ -350,10 +352,11 @@ int partition (Process *arr, int low, int high){
   low  --> Starting index,
   high  --> Ending index */
 void quickSort(Process *arr, int low, int high){
+  int pi;
     if (low < high){
         /* pi is partitioning index, arr[p] is now
            at right place */
-        int pi = partition(arr, low, high);
+        pi = partition(arr, low, high);
 
         // Separately sort elements before
         // partition and after partition
@@ -380,7 +383,7 @@ Process *poll(){
 
 void rr(Process *processes, int processCount, int runFor, int quantum){
 
-	int pi = 0, timeLeft = 0;
+	int i, pi = 0, timeLeft = 0, t;
 	Process *cur = NULL;
 	FILE *out = fopen("processes.out","w+");
 	q = malloc(sizeof(Process*) * processCount);
@@ -388,10 +391,10 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 	qSize = 0;
 	qMax = processCount;
 	quickSort(processes,0,processCount-1);
-	
+
 	fprintf(out,"%d processes\nUsing Round-Robin\nQuantum %d\n\n",processCount,quantum);
-  
-	for(int t=0;t<runFor;t++){
+
+	for(t=0;t<runFor;t++){
 		if(pi < processCount && processes[pi].arrival==t){ //something arrived
 			insert(processes+pi); //insert takes a pointer
 			fprintf(out, "Time %d: %s arrived\n", t, processes[pi].name);
@@ -423,16 +426,16 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 		if(!cur)
 			fprintf(out,"Time %d: Idle\n",t);
 	}
-	
+
 	//annoying edge case: A process may complete right as the simulation ends,
 	//even though we won't detect or announce it.
 	//This accounts for that.
 	if(cur && cur->remainder==1){
 		cur->finishTime = runFor;
 	}
-	
+
 	fprintf(out, "Finished at time %d\n\n",runFor);
-	for(int i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess round robin prints in order of arrival.
+	for(i=0;i<processCount;i++){ //CRAP. They're out of order, now. Welp, I guess round robin prints in order of arrival.
 
 		if(processes[i].finishTime>=0)
 			fprintf(out, "%s wait %d turnaround %d\n", processes[i].name, processes[i].finishTime-processes[i].arrival-processes[i].burst, processes[i].finishTime-processes[i].arrival);
@@ -443,7 +446,7 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 	free(q);
 
 	fclose(out);
-	
+
 }
 
 /*
@@ -462,6 +465,7 @@ void rr(Process *processes, int processCount, int runFor, int quantum){
 */
 void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
 {
+  int i, p;
   printf("Opening and reading input file...\n");
 
   //Open that thing
@@ -669,7 +673,7 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
     printf("algorithm = %d\n", algorithm);
     printf("quantum = %d\n", quantum);
     printf("Process List:\n");
-    for (int i = 0; i < curProcess; i++)
+    for (i = 0; i < curProcess; i++)
     {
       printf("   Process Name = \"%s\", Arrival = %d, Burst = %d\n", processes[i].name, processes[i].arrival, processes[i].burst);
     }
@@ -723,7 +727,7 @@ void parseInputAndDelegateWork(char * inputFilePath, int printVerbose)
   }
 
   //Free any dynamically allocated resources!
-  for (int p = 0; p < processCount; p++)
+  for (p = 0; p < processCount; p++)
   {
     free(processes[p].name);
   }
