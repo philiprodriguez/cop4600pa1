@@ -1,11 +1,11 @@
 #A case with a process that can't finish before the simulation stops.
 #Does your code handle this?
-#P1 should have wait time of 1, turnaround N/A.
+#P1 should have wait time of 2, turnaround N/A.
 
 processcount 2
 runfor 10             
 use rr                # Change this to the algorithm you wish to test. Results are the same for each.
-quantum 2             # Time quantum – only if using rr
+quantum 2             # Time quantum â€“ only if using rr
 process name P1 arrival 0 burst 20
 process name P2 arrival 1 burst 1
 end
